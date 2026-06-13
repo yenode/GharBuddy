@@ -1,0 +1,19 @@
+# Node dependencies
+node_modules/
+dist/
+
+# Python cache & envs
+__pycache__/
+*.pyc
+.venv/
+env/
+venv/
+
+# Local configurations
+.env
+.env.local
+
+# IDE metadata
+.vscode/
+.idea/
+.gemini/

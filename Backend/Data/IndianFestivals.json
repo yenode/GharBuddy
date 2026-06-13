@@ -1,0 +1,44 @@
+[
+  {
+    "festivalName": "Maha Shivratri",
+    "dateString": "03-06",
+    "isFastingDay": true,
+    "suppressCookingAlerts": true,
+    "poojaDurationMinutes": 45
+  },
+  {
+    "festivalName": "Rama Navami",
+    "dateString": "04-16",
+    "isFastingDay": true,
+    "suppressCookingAlerts": true,
+    "poojaDurationMinutes": 30
+  },
+  {
+    "festivalName": "Navratri Start",
+    "dateString": "10-12",
+    "isFastingDay": true,
+    "suppressCookingAlerts": true,
+    "poojaDurationMinutes": 40
+  },
+  {
+    "festivalName": "Diwali",
+    "dateString": "11-08",
+    "isFastingDay": false,
+    "suppressCookingAlerts": false,
+    "poojaDurationMinutes": 60
+  },
+  {
+    "festivalName": "Ekadashi (Monthly Fast)",
+    "dateString": "06-14",
+    "isFastingDay": true,
+    "suppressCookingAlerts": true,
+    "poojaDurationMinutes": 30
+  },
+  {
+    "festivalName": "Independence Day",
+    "dateString": "08-15",
+    "isFastingDay": false,
+    "suppressCookingAlerts": false,
+    "poojaDurationMinutes": 20
+  }
+]
