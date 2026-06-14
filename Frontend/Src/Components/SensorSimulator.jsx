@@ -1,4 +1,5 @@
 import React from "react";
+import { CardTitle, IconSettings } from "./Icons.jsx";
 
 export default function SensorSimulator({ systemState, onStateChange }) {
   const triggerSensor = async (sensorId, value) => {
@@ -35,10 +36,12 @@ export default function SensorSimulator({ systemState, onStateChange }) {
 
   return (
     <div className="glassCard" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      <div className="cardHeader">
-        <h2>🏡 Sensor Simulator & Context Toggles</h2>
-        <span className="glowingDot"></span>
-      </div>
+      <CardTitle
+        icon={IconSettings}
+        iconColor="var(--colorAmber)"
+        title="Sensor Simulator"
+        badge={<span className="glowingDot" style={{ width: "6px", height: "6px" }}></span>}
+      />
 
       {/* Simulated Time & Date Settings */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
