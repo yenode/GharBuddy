@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BackendService } from "../Services/BackendService";
+import { CardTitle, IconUsers } from "./Icons.jsx";
 
 export default function CommunityEnergyDashboard() {
   const [data, setData] = useState(null);
@@ -39,13 +39,17 @@ export default function CommunityEnergyDashboard() {
 
   return (
     <div className="glassCard" style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-      {/* Header */}
-      <div className="cardHeader" style={{ marginBottom: "4px" }}>
-        <h2>🏘️ Community Energy Dashboard</h2>
-        <span className="statusBadge" style={{ background: "rgba(38,194,129,0.1)", color: "var(--colorSuccess)", border: "1px solid rgba(38,194,129,0.2)", fontSize: "10px" }}>
-          <span className="glowingDot" style={{ width: "5px", height: "5px" }}></span> Live · 5s
-        </span>
-      </div>
+      <CardTitle
+        icon={IconUsers}
+        iconColor="var(--colorActive)"
+        title="Community Energy"
+        badge={
+          <span className="statusBadge" style={{ background: "rgba(34,197,94,0.08)", color: "var(--colorSuccess)", borderColor: "rgba(34,197,94,0.15)", fontSize: "10px", gap: "4px" }}>
+            <span className="glowingDot" style={{ width: "5px", height: "5px" }}></span>
+            Live · 5s
+          </span>
+        }
+      />
 
       {/* Transformer Load */}
       <div style={{

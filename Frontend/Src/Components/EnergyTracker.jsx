@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BackendService } from "../Services/BackendService";
+import { CardTitle, IconBarChart } from "./Icons.jsx";
 
 export default function EnergyTracker({ energyStats }) {
   const { totalSavedWh, rupeesSaved, peakPowerAvoidedW, inverterBatteryCharge } = energyStats;
@@ -67,10 +68,16 @@ export default function EnergyTracker({ energyStats }) {
   return (
     <div className="glassCard" style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
       <div className="cardHeader">
-        <h2>📊 Indian Household Energy & Cost Tracker</h2>
-        <span className="statusBadge" style={{ background: "rgba(38,194,129,0.12)", color: "var(--colorSuccess)", border: "1px solid rgba(38,194,129,0.2)" }}>
-          Live DISCOM Estimate
-        </span>
+        <CardTitle
+          icon={IconBarChart}
+          iconColor="var(--colorSuccess)"
+          title="Energy & Cost Tracker"
+          badge={
+            <span className="statusBadge" style={{ background: "rgba(34,197,94,0.08)", color: "var(--colorSuccess)", borderColor: "rgba(34,197,94,0.18)", fontSize: "10px" }}>
+              Live DISCOM
+            </span>
+          }
+        />
       </div>
 
       {/* Load Shedding Risk Badge */}

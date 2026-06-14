@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BackendService } from "../Services/BackendService";
+import { CardTitle, IconBrain } from "./Icons.jsx";
 
 export default function ReasoningPanel({ lastTriggerResult }) {
   const [showRawContext, setShowRawContext] = useState(false);
@@ -153,12 +154,16 @@ export default function ReasoningPanel({ lastTriggerResult }) {
 
   return (
     <div className="glassCard" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <div className="cardHeader">
-        <h2>🧠 Bedrock Explainable AI Core</h2>
-        <span className="statusBadge" style={{ background: "rgba(142,45,226,0.15)", color: "#c084fc", border: "1px solid rgba(142,45,226,0.2)" }}>
-          Claude 3.5 Sonnet
-        </span>
-      </div>
+      <CardTitle
+        icon={IconBrain}
+        iconColor="var(--colorPurple)"
+        title="Bedrock AI Reasoning"
+        badge={
+          <span className="statusBadge" style={{ background: "rgba(139,92,246,0.1)", color: "#a78bfa", borderColor: "rgba(139,92,246,0.18)", fontSize: "10px" }}>
+            Claude 3.5 Sonnet
+          </span>
+        }
+      />
 
       {/* Confidence Dial Display */}
       <div style={{ display: "flex", gap: "20px", alignItems: "center", background: "rgba(255,255,255,0.02)", padding: "12px", borderRadius: "12px" }}>

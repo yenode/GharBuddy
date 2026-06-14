@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { BackendService } from "../Services/BackendService";
+import { CardTitle, IconMic } from "./Icons.jsx";
 
 export default function VoiceWidget() {
   const [isRecording, setIsRecording] = useState(false);
@@ -71,12 +72,16 @@ export default function VoiceWidget() {
 
   return (
     <div className="glassCard" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-      <div className="cardHeader" style={{ marginBottom: "4px" }}>
-        <h2>🎙️ Voice Control (Hindi / Hinglish)</h2>
-        <span className="statusBadge" style={{ background: "rgba(38,194,129,0.1)", color: "var(--colorSuccess)", border: "1px solid rgba(38,194,129,0.2)", fontSize: "10px" }}>
-          Whisper ASR
-        </span>
-      </div>
+      <CardTitle
+        icon={IconMic}
+        iconColor="#22c55e"
+        title="Voice Control"
+        badge={
+          <span className="statusBadge" style={{ background: "rgba(34,197,94,0.08)", color: "var(--colorSuccess)", borderColor: "rgba(34,197,94,0.15)", fontSize: "10px" }}>
+            Hindi · Hinglish
+          </span>
+        }
+      />
 
       <p style={{ fontSize: "11px", color: "var(--textMuted)" }}>
         Speak in Hindi or Hinglish: "geyser on", "batti off", "pooja mode", "padhai mode"
