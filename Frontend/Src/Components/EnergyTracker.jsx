@@ -140,9 +140,9 @@ export default function EnergyTracker({ energyStats }) {
       {/* Inverter Battery Charge Level Indicator */}
       <div style={{ display: "flex", gap: "16px", alignItems: "center", background: "rgba(255,255,255,0.02)", padding: "16px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.04)" }}>
         {/* SVG Battery Block */}
-        <div style={{ position: "relative", width: "42px", height: "74px", border: "3px solid #63697a", borderRadius: "6px", padding: "2px" }}>
+        <div style={{ position: "relative", width: "42px", height: "74px", border: "3px solid var(--borderStrong)", borderRadius: "6px", padding: "2px" }}>
           {/* Battery Cap */}
-          <div style={{ position: "absolute", top: "-8px", left: "11px", width: "14px", height: "6px", background: "#63697a", borderRadius: "2px 2px 0 0" }}></div>
+          <div style={{ position: "absolute", top: "-8px", left: "11px", width: "14px", height: "6px", background: "var(--textMuted)", borderRadius: "2px 2px 0 0" }}></div>
           {/* Inner Fill level */}
           <div
             style={{
@@ -164,7 +164,7 @@ export default function EnergyTracker({ energyStats }) {
           <span style={{ fontSize: "11px", color: "var(--textSecondary)", textTransform: "uppercase", fontWeight: "600", display: "block" }}>
             Inverter Backup Status
           </span>
-          <div style={{ fontSize: "20px", fontWeight: "700", color: "white", marginTop: "4px" }}>
+          <div style={{ fontSize: "20px", fontWeight: "700", color: "var(--textPrimary)", marginTop: "4px" }}>
             {inverterBatteryCharge}% Charged
           </div>
           <p style={{ fontSize: "12px", color: "var(--textMuted)", marginTop: "2px" }}>

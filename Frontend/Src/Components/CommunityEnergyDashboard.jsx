@@ -108,7 +108,7 @@ export default function CommunityEnergyDashboard() {
             }}>
               <span style={{ fontSize: "14px" }}>{home.solarCapacityKw > 0 ? "☀️" : "🏠"}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: "12px", fontWeight: "600", color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: "12px", fontWeight: "600", color: "var(--textPrimary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {home.name}
                 </div>
                 <div style={{ fontSize: "10px", color: "var(--textSecondary)" }}>
