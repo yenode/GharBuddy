@@ -1,6 +1,45 @@
 const baseUrl = ""; // Handled dynamically via Vite server proxy
 
 export const BackendService = {
+  // Auth token storage (in-memory for demo)
+  _token: null,
+
+  async login(username, password) {
+    const res = await fetch(`${baseUrl}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+    if (!res.ok) throw new Error("Login failed");
+    const data = await res.json();
+    this._token = data.access_token;
+    return data;
+  },
+
+  async verifyToken() {
+    const token = localStorage.getItem("gharbuddy_token") || this._token;
+    if (!token) return null;
+    const res = await fetch(`${baseUrl}/api/auth/verify`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (!res.ok) return null;
+    return res.json();
+  },
+
+  getAuthHeaders() {
+    const token = localStorage.getItem("gharbuddy_token") || this._token;
+    if (token) {
+      return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+    }
+    return { "Content-Type": "application/json" };
+  },
+
+  async getAuthStatus() {
+    const res = await fetch(`${baseUrl}/api/auth/status`);
+    if (!res.ok) throw new Error("Failed to get auth status");
+    return res.json();
+  },
+
   async getDevices() {
     const res = await fetch(`${baseUrl}/api/devices`);
     if (!res.ok) throw new Error("Failed to fetch device data");
@@ -10,7 +49,7 @@ export const BackendService = {
   async toggleDevice(deviceId, status) {
     const res = await fetch(`${baseUrl}/api/devices/toggle`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: this.getAuthHeaders(),
       body: JSON.stringify({ deviceId, status })
     });
     if (!res.ok) throw new Error("Failed to toggle device");
@@ -38,7 +77,7 @@ export const BackendService = {
   async updateSettings(settings) {
     const res = await fetch(`${baseUrl}/api/settings/update`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: this.getAuthHeaders(),
       body: JSON.stringify(settings)
     });
     if (!res.ok) throw new Error("Failed to sync settings");

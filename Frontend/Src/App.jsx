@@ -8,6 +8,7 @@ import WhatsAppMock from "./Components/WhatsAppMock";
 import EnergyTracker from "./Components/EnergyTracker";
 import HouseholdMap from "./Components/HouseholdMap";
 import VoiceWidget from "./Components/VoiceWidget";
+import LoginModal from "./Components/LoginModal";
 
 export default function App() {
   const [devices, setDevices] = useState({});
@@ -31,6 +32,8 @@ export default function App() {
   const [lastTriggerResult, setLastTriggerResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const { isConnected, lastMessage } = useWebSocket("ws://localhost:8000/ws");
   const pollingIntervalRef = useRef(null);
@@ -66,6 +69,20 @@ export default function App() {
   // Initial data fetch — runs once on mount regardless of WebSocket state
   useEffect(() => {
     syncData();
+  }, []);
+
+  // Restore session from localStorage on mount
+  useEffect(() => {
+    const token = localStorage.getItem("gharbuddy_token");
+    const userJson = localStorage.getItem("gharbuddy_user");
+    if (token && userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        setCurrentUser(user);
+      } catch (_) {
+        // Ignore malformed stored user
+      }
+    }
   }, []);
 
   // Effect A — handle WebSocket messages
@@ -176,6 +193,20 @@ export default function App() {
               );
             })()}
           </div>
+          {/* Auth user badge (Issue #6) */}
+          {currentUser ? (
+            <div className="statusBadge" style={{ background: "rgba(46,213,115,0.1)", color: "var(--colorSuccess)", border: "1px solid rgba(46,213,115,0.2)", cursor: "default" }}>
+              &#x1F464; {currentUser.username} <span style={{ opacity: 0.7, fontSize: "10px" }}>({currentUser.role})</span>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowLogin(true)}
+              className="btn btnPrimary"
+              style={{ fontSize: "12px", padding: "6px 14px" }}
+            >
+              &#x1F511; Sign In
+            </button>
+          )}
         </div>
       </header>
 
@@ -209,8 +240,14 @@ export default function App() {
       </main>
 
       <footer style={{ marginTop: "48px", textAlign: "center", padding: "20px 0", borderTop: "1px solid rgba(255,255,255,0.05)", fontSize: "11px", color: "var(--textMuted)" }}>
-        GharBuddy Smart Systems • HackOn with Amazon Season 6.0 Submission • Powered by AWS Bedrock Claude & AWS IoT Core
+        GharBuddy Smart Systems &bull; HackOn with Amazon Season 6.0 Submission &bull; Powered by AWS Bedrock Claude &amp; AWS IoT Core
       </footer>
+      {showLogin && (
+        <LoginModal
+          onLogin={(u) => { setCurrentUser({ username: u.username, role: u.role }); setShowLogin(false); }}
+          onClose={() => setShowLogin(false)}
+        />
+      )}
     </div>
   );
 }

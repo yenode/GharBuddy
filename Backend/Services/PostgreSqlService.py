@@ -571,6 +571,39 @@ class PostgreSqlService:
                     print(f"SQL Error in getVectors: {e}. Falling back to mock index.")
         return self.mockVectorIndex
 
+    def getVectorsChunk(self, offset=0, limit=50):
+        """
+        Issue #18 — Returns a paginated slice of VectorIndex ordered by ruleId.
+        In live mode: SQL LIMIT/OFFSET; in mock mode: Python slice.
+        """
+        print(f"[SQL Log] SELECT content, vector, category FROM VectorIndex ORDER BY ruleId LIMIT {limit} OFFSET {offset};")
+        with self.get_db_connection() as conn:
+            if conn:
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            "SELECT content, vector, category FROM VectorIndex ORDER BY ruleId LIMIT %s OFFSET %s;",
+                            (limit, offset)
+                        )
+                        rows = cur.fetchall()
+                        records = []
+                        for row in rows:
+                            vector_val = row[1]
+                            if isinstance(vector_val, str):
+                                try:
+                                    vector_val = json.loads(vector_val)
+                                except Exception:
+                                    pass
+                            records.append({
+                                "content": row[0],
+                                "vector": vector_val,
+                                "category": row[2]
+                            })
+                        return records
+                except Exception as e:
+                    print(f"SQL Error in getVectorsChunk: {e}. Falling back to mock slice.")
+        return self.mockVectorIndex[offset:offset + limit]
+
     def insertVectorRule(self, content, vector, category):
         try:
             print(f"[SQL Log] INSERT INTO VectorIndex (content, vector, category) VALUES ('{content[:30]}...', <float_array>, '{category}');")
@@ -628,6 +661,70 @@ class PostgreSqlService:
                 except Exception as e:
                     print(f"SQL Error in insertEmbeddingIntoCache: {e}")
         self.mockEmbeddingCache[textHash] = embedding
+
+    def evictOldEmbeddings(self, maxEntries=500):
+        """
+        Issue #20 — Evicts embedding cache entries beyond maxEntries, oldest first.
+        In live mode uses rowid ordering; in mock mode trims the dict to maxEntries keys.
+        """
+        print(f"[SQL Log] Evicting embedding cache entries beyond {maxEntries}.")
+        with self.get_db_connection() as conn:
+            if conn:
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            """
+                            DELETE FROM EmbeddingCache
+                            WHERE textHash IN (
+                                SELECT textHash FROM EmbeddingCache
+                                ORDER BY ctid ASC
+                                OFFSET %s
+                            );
+                            """,
+                            (maxEntries,)
+                        )
+                    return
+                except Exception as e:
+                    print(f"SQL Error in evictOldEmbeddings: {e}. Falling back to mock eviction.")
+        # Mock mode: trim to maxEntries by removing oldest keys
+        if len(self.mockEmbeddingCache) > maxEntries:
+            keys_to_remove = list(self.mockEmbeddingCache.keys())[:-maxEntries]
+            for k in keys_to_remove:
+                del self.mockEmbeddingCache[k]
+
+    def getVectorsByCategory(self, category, limit=100):
+        """
+        Issue #18 — Returns vector records filtered by category.
+        In live mode queries SQL; in mock mode filters mockVectorIndex.
+        """
+        print(f"[SQL Log] SELECT content, vector, category FROM VectorIndex WHERE category = '{category}' LIMIT {limit};")
+        with self.get_db_connection() as conn:
+            if conn:
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            "SELECT content, vector, category FROM VectorIndex WHERE category = %s LIMIT %s;",
+                            (category, limit)
+                        )
+                        rows = cur.fetchall()
+                        records = []
+                        for row in rows:
+                            vector_val = row[1]
+                            if isinstance(vector_val, str):
+                                try:
+                                    vector_val = json.loads(vector_val)
+                                except Exception:
+                                    pass
+                            records.append({
+                                "content": row[0],
+                                "vector": vector_val,
+                                "category": row[2]
+                            })
+                        return records
+                except Exception as e:
+                    print(f"SQL Error in getVectorsByCategory: {e}. Falling back to mock filter.")
+        filtered = [r for r in self.mockVectorIndex if r.get("category") == category]
+        return filtered[:limit]
 
     def deleteVectorRule(self, content):
         with self.get_db_connection() as conn:
