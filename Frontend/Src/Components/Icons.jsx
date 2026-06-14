@@ -202,6 +202,50 @@ export function IconWifi(p = {}) {
   );
 }
 
+export function IconChevronLeft(p = {}) {
+  return (
+    <svg {...iconProps} {...p}>
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  );
+}
+
+export function IconMenu(p = {}) {
+  return (
+    <svg {...iconProps} {...p}>
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+
+export function IconSparkle(p = {}) {
+  return (
+    <svg {...iconProps} {...p}>
+      <path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4L12 3z" />
+    </svg>
+  );
+}
+
+export function IconArrowRight(p = {}) {
+  return (
+    <svg {...iconProps} {...p}>
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  );
+}
+
+export function IconLeaf(p = {}) {
+  return (
+    <svg {...iconProps} {...p}>
+      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
+      <path d="M2 21c0-3 1.85-5.36 5.08-6" />
+    </svg>
+  );
+}
+
 /** Generic card section label with icon */
 export function SectionLabel({ icon: Icon, label, color = "var(--textMuted)", size = "11px" }) {
   return (

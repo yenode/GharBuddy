@@ -70,7 +70,7 @@ export default function ReasoningPanel({ lastTriggerResult }) {
   function renderRuleForm() {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-        <h3 style={{ fontSize: "14px", fontWeight: "600", color: "white" }}>🧠 Add Custom Grounding / Override Rule</h3>
+        <h3 style={{ fontSize: "14px", fontWeight: "600", color: "var(--textPrimary)" }}>🧠 Add Custom Grounding / Override Rule</h3>
         <form onSubmit={handleAddRule} style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           <textarea
             value={newRuleText}
@@ -83,7 +83,7 @@ export default function ReasoningPanel({ lastTriggerResult }) {
               background: "#0c0d12",
               border: "1px solid rgba(255,255,255,0.08)",
               borderRadius: "6px",
-              color: "white",
+              color: "var(--textPrimary)",
               fontSize: "12px",
               resize: "none",
               fontFamily: "var(--fontFamily)"
@@ -98,7 +98,7 @@ export default function ReasoningPanel({ lastTriggerResult }) {
                 background: "#0c0d12",
                 border: "1px solid rgba(255,255,255,0.08)",
                 borderRadius: "6px",
-                color: "white",
+                color: "var(--textPrimary)",
                 fontSize: "12px"
               }}
             >
@@ -189,7 +189,7 @@ export default function ReasoningPanel({ lastTriggerResult }) {
         </div>
 
         <div style={{ flex: 1 }}>
-          <h3 style={{ fontSize: "15px", fontWeight: "600", color: "white" }}>
+          <h3 style={{ fontSize: "15px", fontWeight: "600", color: "var(--textPrimary)" }}>
             Confidence Level: {confidencePercent >= 85 ? "High (Auto-Execute)" : "Medium (User Confirm)"}
           </h3>
           <p style={{ fontSize: "12px", color: "var(--textSecondary)", marginTop: "2px" }}>
@@ -232,7 +232,7 @@ export default function ReasoningPanel({ lastTriggerResult }) {
           <span style={{ fontSize: "11px", textTransform: "uppercase", color: "var(--textMuted)", fontWeight: "700" }}>
             Explainable AI (Hindi Alert)
           </span>
-          <div style={{ fontSize: "15px", color: "white", padding: "10px", background: "rgba(255, 126, 64, 0.05)", borderRadius: "8px", borderLeft: "4px solid var(--colorOrange)", marginTop: "4px", lineHeight: "1.4" }}>
+          <div style={{ fontSize: "15px", color: "var(--textPrimary)", padding: "10px", background: "rgba(255, 126, 64, 0.05)", borderRadius: "8px", borderLeft: "4px solid var(--colorOrange)", marginTop: "4px", lineHeight: "1.4" }}>
             {decision.explanationHindi || "जानकारी उपलब्ध नहीं है।"}
           </div>
         </div>

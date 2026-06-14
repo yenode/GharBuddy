@@ -131,7 +131,7 @@ export default function VoiceWidget() {
           {lastResult.transcript && (
             <div>
               <span style={{ color: "var(--textMuted)", fontSize: "10px", textTransform: "uppercase" }}>Heard: </span>
-              <span style={{ color: "white" }}>"{lastResult.transcript}"</span>
+              <span style={{ color: "var(--textPrimary)" }}>"{lastResult.transcript}"</span>
             </div>
           )}
           {lastResult.action && (

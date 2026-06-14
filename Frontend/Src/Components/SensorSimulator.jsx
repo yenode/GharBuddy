@@ -57,10 +57,10 @@ export default function SensorSimulator({ systemState, onStateChange }) {
             style={{
               width: "100%",
               padding: "10px",
-              background: "#1c202e",
+              background: "var(--bgInput)",
               border: "1px solid var(--borderCard)",
               borderRadius: "8px",
-              color: "white",
+              color: "var(--textPrimary)",
               fontSize: "14px"
             }}
           />
@@ -76,10 +76,10 @@ export default function SensorSimulator({ systemState, onStateChange }) {
             style={{
               width: "100%",
               padding: "10px",
-              background: "#1c202e",
+              background: "var(--bgInput)",
               border: "1px solid var(--borderCard)",
               borderRadius: "8px",
-              color: "white",
+              color: "var(--textPrimary)",
               fontSize: "14px"
             }}
           >
@@ -128,10 +128,10 @@ export default function SensorSimulator({ systemState, onStateChange }) {
             style={{
               width: "100%",
               padding: "10px",
-              background: "#1c202e",
+              background: "var(--bgInput)",
               border: "1px solid var(--borderCard)",
               borderRadius: "8px",
-              color: "white",
+              color: "var(--textPrimary)",
               fontSize: "14px"
             }}
           >
@@ -150,10 +150,10 @@ export default function SensorSimulator({ systemState, onStateChange }) {
             style={{
               width: "100%",
               padding: "10px",
-              background: "#1c202e",
+              background: "var(--bgInput)",
               border: "1px solid var(--borderCard)",
               borderRadius: "8px",
-              color: "white",
+              color: "var(--textPrimary)",
               fontSize: "14px"
             }}
           >
@@ -166,7 +166,7 @@ export default function SensorSimulator({ systemState, onStateChange }) {
 
       {/* Sensor Event Triggers */}
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.05)", paddingTop: "16px" }}>
-        <span style={{ fontSize: "13px", fontWeight: "600", color: "white", display: "block", marginBottom: "12px" }}>
+        <span style={{ fontSize: "13px", fontWeight: "600", color: "var(--textPrimary)", display: "block", marginBottom: "12px" }}>
           Simulated IoT Sensor Events (Click to Fire):
         </span>
 
