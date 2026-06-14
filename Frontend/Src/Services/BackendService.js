@@ -1,5 +1,11 @@
 const baseUrl = ""; // Handled dynamically via Vite server proxy
 
+// Helper: build auth headers for mutation calls
+const _authHeaders = (token) =>
+  token
+    ? { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
+    : { "Content-Type": "application/json" };
+
 export const BackendService = {
   // Auth token storage (in-memory for demo)
   _token: null,
@@ -17,7 +23,7 @@ export const BackendService = {
   },
 
   async verifyToken() {
-    const token = localStorage.getItem("gharbuddy_token") || this._token;
+    const token = sessionStorage.getItem("gb_token") || localStorage.getItem("gharbuddy_token") || this._token;
     if (!token) return null;
     const res = await fetch(`${baseUrl}/api/auth/verify`, {
       headers: { "Authorization": `Bearer ${token}` }
@@ -27,7 +33,7 @@ export const BackendService = {
   },
 
   getAuthHeaders() {
-    const token = localStorage.getItem("gharbuddy_token") || this._token;
+    const token = sessionStorage.getItem("gb_token") || localStorage.getItem("gharbuddy_token") || this._token;
     if (token) {
       return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
     }
@@ -46,10 +52,10 @@ export const BackendService = {
     return res.json();
   },
 
-  async toggleDevice(deviceId, status) {
+  async toggleDevice(deviceId, status, token = "") {
     const res = await fetch(`${baseUrl}/api/devices/toggle`, {
       method: "POST",
-      headers: this.getAuthHeaders(),
+      headers: _authHeaders(token || this.getAuthHeaders()["Authorization"]?.replace("Bearer ", "") || ""),
       body: JSON.stringify({ deviceId, status })
     });
     if (!res.ok) throw new Error("Failed to toggle device");
@@ -74,40 +80,40 @@ export const BackendService = {
     return res.json();
   },
 
-  async updateSettings(settings) {
+  async updateSettings(settings, token = "") {
     const res = await fetch(`${baseUrl}/api/settings/update`, {
       method: "POST",
-      headers: this.getAuthHeaders(),
+      headers: _authHeaders(token || this.getAuthHeaders()["Authorization"]?.replace("Bearer ", "") || ""),
       body: JSON.stringify(settings)
     });
     if (!res.ok) throw new Error("Failed to sync settings");
     return res.json();
   },
 
-  async triggerSensor(sensorId, value) {
+  async triggerSensor(sensorId, value, token = "") {
     const res = await fetch(`${baseUrl}/api/sensors/trigger`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: _authHeaders(token || this.getAuthHeaders()["Authorization"]?.replace("Bearer ", "") || ""),
       body: JSON.stringify({ sensorId, value })
     });
     if (!res.ok) throw new Error("Failed to dispatch sensor trigger");
     return res.json();
   },
 
-  async approveAction(actionId, approve) {
+  async approveAction(actionId, approve, token = "") {
     const res = await fetch(`${baseUrl}/api/actions/override`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: _authHeaders(token || this.getAuthHeaders()["Authorization"]?.replace("Bearer ", "") || ""),
       body: JSON.stringify({ actionId, approve })
     });
     if (!res.ok) throw new Error("Failed to send action override");
     return res.json();
   },
 
-  async addVectorRule(content, category) {
+  async addVectorRule(content, category, token = "") {
     const res = await fetch(`${baseUrl}/api/vectors/add`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: _authHeaders(token || this.getAuthHeaders()["Authorization"]?.replace("Bearer ", "") || ""),
       body: JSON.stringify({ content, category })
     });
     if (!res.ok) throw new Error("Failed to add vector rule");
@@ -152,6 +158,18 @@ export const BackendService = {
   async getLoadSheddingSchedule() {
     const res = await fetch(`${baseUrl}/api/inverter/schedule`);
     if (!res.ok) throw new Error("Failed to fetch schedule");
+    return res.json();
+  },
+
+  async getCacheDiagnostics() {
+    const res = await fetch(`${baseUrl}/api/cache/diagnostics`);
+    if (!res.ok) throw new Error("Failed to fetch cache diagnostics");
+    return res.json();
+  },
+
+  async getVectorStats() {
+    const res = await fetch(`${baseUrl}/api/vectors/stats`);
+    if (!res.ok) throw new Error("Failed to fetch vector stats");
     return res.json();
   },
 };

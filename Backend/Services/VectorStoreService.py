@@ -216,17 +216,19 @@ class VectorStoreService:
         elapsed = datetime.now(timezone.utc) - self.lastConsolidationTime
         return elapsed.total_seconds() >= intervalHours * 3600
 
-    def getConsolidationStats(self):
-        """Issue #21 — Returns count of rules per category and total."""
+    def getConsolidationStats(self) -> dict:
+        """Returns stats useful for deciding when to run consolidation. Issue #21."""
+        total = self.db.getVectorCount()
+        # Count by category
         records = self.db.getVectors()
-        categoryCounts = {}
-        for rec in records:
-            cat = rec.get("category", "unknown")
-            categoryCounts[cat] = categoryCounts.get(cat, 0) + 1
+        category_counts = {}
+        for r in records:
+            cat = r.get("category", "unknown")
+            category_counts[cat] = category_counts.get(cat, 0) + 1
         return {
-            "total": len(records),
-            "byCategory": categoryCounts,
-            "lastConsolidation": self.lastConsolidationTime.isoformat() if self.lastConsolidationTime else None,
+            "totalRules": total,
+            "categoryBreakdown": category_counts,
+            "recommendConsolidation": total > 20,
         }
 
     def scheduleAutoConsolidation(self, bedrockService, similarityThreshold=0.85):

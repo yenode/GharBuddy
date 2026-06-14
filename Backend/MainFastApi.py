@@ -230,8 +230,18 @@ def executeAction(decision):
     msgText = f"सक्रिय (Active): {explanation}"
     twilioInstance.sendWhatsApp(msgText, actionId=actionId, suggestActions=False)
 
+@app.get("/api/auth/me")
+def getMe(user: str = Depends(requireAuth)):
+    """Issue #6 — Return the authenticated user's info."""
+    role = None
+    from Backend.Services.AuthService import DEMO_USERS
+    user_entry = DEMO_USERS.get(user)
+    if user_entry:
+        role = user_entry.get("role")
+    return {"username": user, "role": role or "member"}
+
 @app.post("/api/sensors/trigger")
-def triggerSensor(req: SensorTriggerRequest, background_tasks: BackgroundTasks):
+def triggerSensor(req: SensorTriggerRequest, background_tasks: BackgroundTasks, user: str = Depends(requireAuth)):
     # Log sensor hit
     event = predictorInstance.recordEvent(req.sensorId, req.value, simulatedTime)
     databaseInstance.logEvent(event)
@@ -434,6 +444,10 @@ def consolidateVectorRules():
 def getVectorCacheStats():
     return vectorStoreInstance.getCacheStats()
 
+@app.get("/api/cache/diagnostics")
+def getCacheDiagnostics():
+    return databaseInstance.pgService.getCacheDiagnostics()
+
 @app.post("/api/vectors/cache-evict")
 def evictVectorCache():
     vectorStoreInstance.evictOldestEmbeddings(keepCount=500)
@@ -442,6 +456,13 @@ def evictVectorCache():
 @app.get("/api/vectors/consolidation-stats")
 def getConsolidationStats():
     return vectorStoreInstance.getConsolidationStats()
+
+@app.get("/api/vectors/stats")
+def getVectorStats():
+    try:
+        return vectorStoreInstance.getConsolidationStats()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/vectors/auto-consolidate")
 def autoConsolidate():

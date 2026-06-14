@@ -63,6 +63,11 @@ class PostgreSqlService:
         self.mockVectorIndex = []
         self.mockEmbeddingCache = {}
 
+        # Issue #20 — embedding cache diagnostics counters
+        self._cacheHits = 0
+        self._cacheMisses = 0
+        self._cacheMaxSize = 500  # evict when mock cache exceeds this
+
         # Mock regional load shedding schedule: { "MM-DD": [{"start": "HH:MM", "end": "HH:MM", "probability": 0.0-1.0}] }
         self.mockLoadSheddingSchedule = {
             "06-13": [{"start": "18:30", "end": "20:00", "probability": 0.85}],
@@ -636,6 +641,7 @@ class PostgreSqlService:
         })
 
     def getEmbeddingFromCache(self, textHash):
+        # Try live DB first
         with self.get_db_connection() as conn:
             if conn:
                 try:
@@ -643,10 +649,19 @@ class PostgreSqlService:
                         cur.execute("SELECT embedding FROM EmbeddingCache WHERE textHash = %s;", (textHash,))
                         row = cur.fetchone()
                         if row:
+                            self._cacheHits += 1
                             return json.loads(row[0])
+                        self._cacheMisses += 1
+                        return None
                 except Exception as e:
                     print(f"SQL Error in getEmbeddingFromCache: {e}")
-        return self.mockEmbeddingCache.get(textHash)
+        # Mock fallback
+        result = self.mockEmbeddingCache.get(textHash)
+        if result is not None:
+            self._cacheHits += 1
+        else:
+            self._cacheMisses += 1
+        return result
 
     def insertEmbeddingIntoCache(self, textHash, inputText, embedding):
         with self.get_db_connection() as conn:
@@ -660,7 +675,27 @@ class PostgreSqlService:
                     return
                 except Exception as e:
                     print(f"SQL Error in insertEmbeddingIntoCache: {e}")
+        # Mock fallback with eviction
+        if len(self.mockEmbeddingCache) >= self._cacheMaxSize:
+            evict_count = max(1, self._cacheMaxSize // 10)
+            keys_to_evict = list(self.mockEmbeddingCache.keys())[:evict_count]
+            for k in keys_to_evict:
+                del self.mockEmbeddingCache[k]
+            print(f"[Cache] Evicted {evict_count} old embeddings. Cache size: {len(self.mockEmbeddingCache)}")
         self.mockEmbeddingCache[textHash] = embedding
+
+    def getCacheDiagnostics(self) -> dict:
+        """Issue #20 — Returns cache hit/miss stats plus current mock cache occupancy."""
+        total = self._cacheHits + self._cacheMisses
+        hitRate = round(self._cacheHits / total, 3) if total > 0 else 0.0
+        return {
+            "hits": self._cacheHits,
+            "misses": self._cacheMisses,
+            "total": total,
+            "hitRate": hitRate,
+            "mockCacheSize": len(self.mockEmbeddingCache),
+            "maxSize": self._cacheMaxSize,
+        }
 
     def evictOldEmbeddings(self, maxEntries=500):
         """
@@ -725,6 +760,50 @@ class PostgreSqlService:
                     print(f"SQL Error in getVectorsByCategory: {e}. Falling back to mock filter.")
         filtered = [r for r in self.mockVectorIndex if r.get("category") == category]
         return filtered[:limit]
+
+    def getVectorMetadataPage(self, offset: int = 0, limit: int = 50) -> list:
+        """Retrieve a page of vector records for chunked similarity calculation. Issue #18."""
+        with self.get_db_connection() as conn:
+            if conn:
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            "SELECT ruleId, content, vector, category FROM VectorIndex ORDER BY ruleId LIMIT %s OFFSET %s;",
+                            (limit, offset)
+                        )
+                        rows = cur.fetchall()
+                        records = []
+                        for row in rows:
+                            vector_val = row[2]
+                            if isinstance(vector_val, str):
+                                try:
+                                    vector_val = json.loads(vector_val)
+                                except Exception:
+                                    pass
+                            records.append({
+                                "ruleId": row[0],
+                                "content": row[1],
+                                "vector": vector_val,
+                                "category": row[3]
+                            })
+                        return records
+                except Exception as e:
+                    print(f"SQL Error in getVectorMetadataPage: {e}")
+        # Mock fallback: return a slice
+        return self.mockVectorIndex[offset:offset + limit]
+
+    def getVectorCount(self) -> int:
+        """Return total count of vector rules. Issue #18."""
+        with self.get_db_connection() as conn:
+            if conn:
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute("SELECT COUNT(*) FROM VectorIndex;")
+                        row = cur.fetchone()
+                        return row[0] if row else 0
+                except Exception as e:
+                    print(f"SQL Error in getVectorCount: {e}")
+        return len(self.mockVectorIndex)
 
     def deleteVectorRule(self, content):
         with self.get_db_connection() as conn:
