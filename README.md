@@ -14,23 +14,39 @@ Below are the visual screenshots captured from the live running system:
 ![User Authentication Portal](visuals/login_page.png)
 The secure login screen handles JWT credentials and integrates Google OAuth login options.
 
-### 2. Home Overview Dashboard:
-![Home Overview Dashboard](visuals/overview.png)
-The interactive 2D floor plan updates in real-time with device states, occupancy detection, and AI pulse indicators.
+### 2. Google Sign-In Portal:
+![Google Sign-In Portal](visuals/google_signin_page.png)
+The custom Google OAuth sign-in option prompts users for authorization.
 
-### 3. Smart Appliances Console:
+### 3. Home Overview Dashboard (Midnight Saffron Theme):
+![Home Overview Dashboard](visuals/overview.png)
+The default midnight theme rendering the interactive SVG floor plan, room occupancies, and device indicators.
+
+### 4. Home Overview Dashboard (Dawn Light Theme):
+![Home Overview Dashboard (Dawn Light Theme)](visuals/theme_dawn_light.png)
+The high-contrast dawn light theme designed for daytime accessibility.
+
+### 5. Home Overview Dashboard (Royal Indigo Theme):
+![Home Overview Dashboard (Royal Indigo Theme)](visuals/theme_royal_indigo.png)
+The glassmorphic royal indigo theme matching specialized evening settings.
+
+### 6. Smart Appliances Console:
 ![Smart Appliances Console](visuals/devices.png)
 A dedicated device manager displaying real-time power consumption, toggle switches, and quick-preset activities.
 
-### 4. Energy Analytics Control:
+### 7. Energy Analytics Control:
 ![Energy Analytics Control](visuals/energy.png)
 Detailed consumption histories, load-shedding lookaheads, and battery status visualizations.
 
-### 5. AI Reasoning Insights:
+### 8. AI Reasoning Insights:
 ![AI Reasoning Insights](visuals/ai_insights.png)
 The cognitive brain of the system displaying live explainable decisions, RAG lookup indicators, and simulation triggers.
 
-### 6. Community Micro-Grid:
+### 9. AI Agent and WhatsApp Integration:
+![AI Agent and WhatsApp Integration](visuals/whatsapp_alert_cooker.png)
+The live WhatsApp simulator sending automated alerts and request confirmations when the cooker whistle threshold is reached.
+
+### 10. Community Micro-Grid:
 ![Community Micro-Grid](visuals/community.png)
 A localized dashboard simulating neighborhood solar shares, energy transfers, and active grid demand.
 
