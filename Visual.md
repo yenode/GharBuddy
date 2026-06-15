@@ -61,3 +61,10 @@ The live WhatsApp simulator sending automated alerts and request confirmations w
 ### 3. Live Twilio WhatsApp Message Delivery:
 ![Live Twilio WhatsApp Message Delivery](visuals/WhatsAppTwilioMessage.png)
 A screenshot showing the actual receipt of the Twilio WhatsApp verification messages on the user mobile handset.
+
+## Demo Video:
+
+You can view the full recorded walk-through demonstration video:
+
+### 1. GharBuddy E2E Demo Walk-Through Video:
+- [gharbuddy_demo.mp4](file:///c:/Users/Xeron/Desktop/AmazonHackOn/visuals/gharbuddy_demo.mp4): A 50-second MP4 demonstration video walking through login, theme switching, simulated sensor triggers, AI decisions, and simulated caregiver alert delivery.
