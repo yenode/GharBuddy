@@ -1,90 +1,56 @@
-# 🪔 GharBuddy — Context-Aware Smart Home for Indian Households
+# GharBuddy Context-Aware Smart Home for Indian Households:
 
-> **HackOn with Amazon Season 6.0 Submission** · Powered by AWS Bedrock Claude & AWS IoT Core
+GharBuddy is a proactive, context-aware smart home assistant designed for Indian households. It understands daily routines like morning pooja, pressure cooker whistles, load-shedding windows, and caregiver anomalies, acting autonomously to preheat water, dim lights, schedule inverter charging, and alert family members.
 
-GharBuddy is a proactive AI-powered smart home assistant that understands Indian household routines — morning pooja, pressure cooker timing, power cuts, and fasting days — and acts before you need to ask.
+## Overview of GharBuddy:
 
-## 🌟 Features
+GharBuddy bridges smart home devices with state-of-the-art Generative AI reasoning. Instead of relying solely on hard-coded schedules or manually triggered scenes, it uses an LSTM machine learning routine combined with LLM orchestrations (AWS Bedrock Claude 3.5 Sonnet and Google Gemini 3.5 Flash) to infer intent and take preemptive action. The front-end React interface is built with premium aesthetics, offering a live 2D digital twin of the home alongside real-time telemetry, AI decision consoles, and neighborhood micro-grid statistics.
 
-- **Live 2D Digital Twin** — Interactive SVG floor plan with 6 rooms, real-time device state, presence indicators, AI pulse animations
-- **Bedrock AI Reasoning** — Claude 3.5 Sonnet makes context-aware decisions with full explainability (Hindi + English)
-- **RAG Similarity Visualizer** — See exactly which vector DB rules influenced each AI decision
-- **Voice Control (Hindi/Hinglish)** — "geyser on", "batti off", "pooja mode" — Whisper ASR
-- **WebSocket Real-time** — Sub-100ms state updates, no polling lag
-- **Caregiver Safety Monitor** — Morning motion check, elderly resident anomaly alerts
-- **Load Shedding Prediction** — Calendar-aware inverter pre-charge engine
-- **JWT Authentication** — Role-based access, sign-in gate
+## Live Visual Demos:
 
-## 🚀 Quick Start
+Below are the visual screenshots captured from the live running system:
 
-```bash
-# 1. Clone
-git clone https://github.com/yenode/GharBuddy
-cd GharBuddy
+### 1. User Authentication Portal:
+![User Authentication Portal](visuals/login_page.png)
+The secure login screen handles JWT credentials and integrates Google OAuth login options.
 
-# 2. Configure
-cp .env.example .env
-# Edit .env with your AWS/DB credentials
+### 2. Home Overview Dashboard:
+![Home Overview Dashboard](visuals/overview.png)
+The interactive 2D floor plan updates in real-time with device states, occupancy detection, and AI pulse indicators.
 
-# 3. Backend
-pip install -r Backend/requirements.txt
-python -m uvicorn Backend.MainFastApi:app --reload --port 8000
+### 3. Smart Appliances Console:
+![Smart Appliances Console](visuals/devices.png)
+A dedicated device manager displaying real-time power consumption, toggle switches, and quick-preset activities.
 
-# 4. Frontend (new terminal)
-cd Frontend && npm install && npm run dev
+### 4. Energy Analytics Control:
+![Energy Analytics Control](visuals/energy.png)
+Detailed consumption histories, load-shedding lookaheads, and battery status visualizations.
 
-# 5. Open http://localhost:5173
-# Login: admin / gharbuddy123
-```
+### 5. AI Reasoning Insights:
+![AI Reasoning Insights](visuals/ai_insights.png)
+The cognitive brain of the system displaying live explainable decisions, RAG lookup indicators, and simulation triggers.
 
-## 🏗️ Architecture
+### 6. Community Micro-Grid:
+![Community Micro-Grid](visuals/community.png)
+A localized dashboard simulating neighborhood solar shares, energy transfers, and active grid demand.
 
-```
-React Dashboard (Vite)  ←→  FastAPI Backend  ←→  AWS Bedrock (Claude + Titan)
-      │                          │                         │
-   WebSocket                PostgreSQL                 Twilio
-   Live Twin                + pgvector               WhatsApp
-```
+## Major Features and Capabilities:
 
-See [docs/architecture.md](docs/architecture.md) for full system design.
+The system is equipped with the following features:
+- Live 2D Digital Twin: The reactive SVG floor plan shows room occupancies and device status dynamically.
+- Hybrid LLM Reasoner: System switches dynamically between AWS Bedrock and Google Gemini to calculate explainable choices.
+- Caregiver Safety Monitor: Tracks morning motions between 6:00 AM and 9:00 AM, automatically executing safety notifications.
+- Predictive Inverter Charger: Syncs with regional power cut timetables to charge batteries prior to outages.
+- Twilio WhatsApp Alerts: Dispatches immediate push notifications to family members regarding anomalies.
+- Vector RAG Optimizer: Evaluates custom user overrides and stores rules inside an indexed database repository.
 
-## 📡 API
+## Documentation Index:
 
-Full API reference: [docs/api-reference.md](docs/api-reference.md)
-
-Interactive Swagger UI: `http://localhost:8000/docs`
-
-## 🚢 Deployment
-
-- **Backend**: [Deploy to Render](deploy/backend/README.md)
-- **Frontend**: [Deploy to Vercel/Netlify](deploy/frontend/README.md)
-- **Database**: [Setup Neon/RDS](deploy/database/neon-setup.md)
-
-## 📖 Documentation
-
-- [System Architecture](docs/architecture.md)
-- [API Reference](docs/api-reference.md)
-- [User Manual (WhatsApp & Voice)](docs/user-manual.md)
-- [Sequence Diagrams](docs/sequence-diagrams.md)
-
-## 🧪 Tests
-
-```bash
-# Backend property-based tests
-python -m pytest Backend/Tests/ -v
-
-# Frontend tests
-cd Frontend && npm test
-```
-
-## 🌍 Use Cases
-
-| Routine | Trigger | Action |
-|---|---|---|
-| Morning Geyser | Toilet flush at 6-8 AM | Auto pre-heat geyser |
-| Pooja Mode | Motion in prayer room | Dim lights, DND speaker |
-| Cooker Alert | N whistle pulses | Completion notification |
-| Power Cut Pre-charge | 85% cut risk window | Fast-charge inverter |
-| Study Mode | Children motion 5-7 PM | Focus brightness |
-| Bedtime | Motion + late hour | All-device sleep shutdown |
-| Caregiver Alert | No motion by 9 AM | WhatsApp emergency alert |
+Refer to these dedicated guides to learn more about the codebase structure, installations, and architecture:
+- [CodeBaseIndex.md](file:///c:/Users/Xeron/Desktop/AmazonHackOn/CodeBaseIndex.md): Directory structures, packages, and file organization.
+- [Frontend.md](file:///c:/Users/Xeron/Desktop/AmazonHackOn/Frontend.md): Client-side components, state providers, and page layouts.
+- [Backend.md](file:///c:/Users/Xeron/Desktop/AmazonHackOn/Backend.md): Server endpoints, background tasks, and database managers.
+- [AIAgent.md](file:///c:/Users/Xeron/Desktop/AmazonHackOn/AIAgent.md): Model parameters, RAG lookup rules, and training routines.
+- [Architecture.md](file:///c:/Users/Xeron/Desktop/AmazonHackOn/Architecture.md): Data flows, message sequences, and hardware simulation loops.
+- [InstallationAndSetup.md](file:///c:/Users/Xeron/Desktop/AmazonHackOn/InstallationAndSetup.md): Prerequisites, local builds, and database setup instructions.
+- [Deploy.md](file:///c:/Users/Xeron/Desktop/AmazonHackOn/Deploy.md): Render blueprint steps, Vercel deployments, and environment syncs.
