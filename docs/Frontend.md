@@ -47,10 +47,16 @@ The application contains five main pages wrapped in a common sidebar layout:
 - Renders local microgrid telemetry representing neighboring houses.
 - Displays interactive charts for solar exports, imports, and local grid demands.
 
-## Data State Providers:
+## Data State Providers
 
 The application handles central data state synchronization:
-- Data Context: Managed inside `DataContext.jsx` to distribute variables across pages.
-- WebSocket Sync: Opens connection to `/api/ws/telemetry` for instant device changes.
-- HTTP Polling Fallback: Defaults to polling every 5 seconds if WebSocket drops out.
-- Token Storage: Persists authenticated JWT credentials in session storage.
+- **Data Context:** Managed inside `DataContext.jsx` to distribute variables across pages.
+- **WebSocket Sync:** Opens a persistent connection to `ws://host:8000/ws` via the `useWebSocket` hook. Receives a full `StateSnapshot` JSON on connect and after every backend mutation.
+- **Exponential Backoff Reconnect:** `computeBackoffDelay(attempt)` retries disconnected sockets with increasing delays (1 s → 2 s → 4 s…).
+- **Token Storage:** Persists authenticated JWT credentials in session storage.
+
+### WebSocket State Sync Architecture
+
+![WebSocket State Sync Sequence](../visuals/GharBuddy_Sequence_WebSocket_Sync.png)
+
+> Full diagram: [`sequence_websocket_sync.puml`](sequence_websocket_sync.puml) | See also: [sequence-diagrams.md](sequence-diagrams.md#4-real-time-websocket-state-sync)
