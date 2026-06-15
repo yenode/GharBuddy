@@ -14,6 +14,10 @@ The secure login screen handles JWT credentials and integrates Google OAuth logi
 ![Google Sign-In Portal](visuals/google_signin_page.png)
 The custom Google OAuth sign-in option prompts users for authorization.
 
+### 3. Google OAuth Active Sign-In Dialog:
+![Google OAuth Active Sign-In Dialog](visuals/GoogleOAuthScreen.png)
+The standard Google identity service overlay requesting email and password authorizations.
+
 ## Smart Home Dashboards:
 
 The interactive views showcase status layouts:
