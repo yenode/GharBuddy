@@ -14,6 +14,6 @@ class AppConfig:
     twilioAuthToken = os.getenv("TWILIO_AUTH_TOKEN", "")
     twilioPhoneNumber = os.getenv("TWILIO_PHONE_NUMBER", "whatsapp:+14155238886")
     userPhoneNumber = os.getenv("USER_PHONE_NUMBER", "")
-    googleClientId = os.getenv("GOOGLE_CLIENT_ID", "760490495261-5uvp3jpq36rj4oe1q3uovod35g4glddj.apps.googleusercontent.com")
+    googleClientId = os.getenv("GOOGLE_CLIENT_ID", "140018359505-8u5mskaaakhjtmhe5d81buu9cr300efk.apps.googleusercontent.com")
     geminiApiKey = os.getenv("GEMINI_API_KEY", "")
     serverPort = 8000

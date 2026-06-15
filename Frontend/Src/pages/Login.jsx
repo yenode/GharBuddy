@@ -185,7 +185,7 @@ export default function Login({ onAuthenticated }) {
   );
 
   return (
-    <GoogleOAuthProvider clientId="760490495261-5uvp3jpq36rj4oe1q3uovod35g4glddj.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="140018359505-8u5mskaaakhjtmhe5d81buu9cr300efk.apps.googleusercontent.com">
       <div className="loginPage">
         <motion.div
           className="loginCard"
