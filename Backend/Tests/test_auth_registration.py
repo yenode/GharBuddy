@@ -129,5 +129,25 @@ class TestLoginPriority(_AuthTestBase):
         self.assertTrue(len(record["password_hash"]) >= 32)
 
 
+class TestGoogleAuth(_AuthTestBase):
+    """Test cases for Google Sign-In backend verification flow."""
+
+    def test_google_login_mock_mode(self):
+        from Backend.MainFastApi import googleLogin, GoogleLoginRequest
+        from Backend.Config.AppConfig import AppConfig
+        
+        # Save original mockMode
+        orig_mock = AppConfig.mockMode
+        AppConfig.mockMode = True
+        try:
+            req = GoogleLoginRequest(token="dummy_google_jwt_token_123")
+            response = googleLogin(req)
+            self.assertEqual(response["username"], "google_user")
+            self.assertEqual(response["role"], "family")
+            self.assertTrue(response["token"])
+        finally:
+            AppConfig.mockMode = orig_mock
+
+
 if __name__ == "__main__":
     unittest.main()

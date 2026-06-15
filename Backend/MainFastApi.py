@@ -455,6 +455,63 @@ def login(req: LoginRequest):
         "message": "GharBuddy authentication successful"
     }
 
+class GoogleLoginRequest(BaseModel):
+    token: str
+
+@app.post("/api/auth/google")
+def googleLogin(req: GoogleLoginRequest):
+    """Authenticate a user using a Google ID token and return a JWT access token."""
+    from Backend.Config.AppConfig import AppConfig
+    token = req.token
+    try:
+        from google.oauth2 import id_token
+        from google.auth.transport import requests as google_requests
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                token,
+                google_requests.Request(),
+                AppConfig.googleClientId
+            )
+            email = idinfo["email"]
+            username = email.split("@")[0]
+        except ValueError as ve:
+            if AppConfig.mockMode:
+                username = "google_user"
+                email = "google_user@example.com"
+            else:
+                raise HTTPException(status_code=401, detail=f"Invalid Google ID token: {ve}")
+    except Exception as e:
+        if AppConfig.mockMode:
+            username = "google_user"
+            email = "google_user@example.com"
+        else:
+            raise HTTPException(status_code=401, detail=f"Google Authentication failed: {e}")
+
+    role = "family"
+    if username not in REGISTERED_USERS:
+        try:
+            import secrets
+            dummy_pass = secrets.token_hex(16)
+            registerUser(
+                username=username,
+                password=dummy_pass,
+                role=role,
+                pgService=databaseInstance.pgService
+            )
+        except Exception:
+            pass
+    local_token = createAccessToken(username)
+    return {
+        "access_token": local_token,
+        "token": local_token,
+        "token_type": "bearer",
+        "username": username,
+        "role": role,
+        "expires_in_minutes": ACCESS_TOKEN_EXPIRE_MINUTES,
+        "expiresIn": ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        "message": "Google authentication successful"
+    }
+
 @app.get("/api/auth/verify")
 def verifyAuth(authorization: str = Header(default="")):
     """Issue #6 - Verify a Bearer token and return user info."""

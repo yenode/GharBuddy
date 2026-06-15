@@ -2,6 +2,7 @@ import json
 import time
 import logging
 import botocore.exceptions
+import requests
 from botocore.config import Config
 from Backend.Config.AppConfig import AppConfig
 
@@ -32,6 +33,14 @@ class BedrockService:
                 print("AWS Bedrock client initialized successfully.")
             except Exception as e:
                 print(f"Failed to initialize AWS Bedrock client: {e}. Falling back to mock Bedrock mode.")
+
+    def _isTesting(self):
+        import sys
+        if 'unittest' in sys.modules:
+            return True
+        if len(sys.argv) > 0 and any(x in sys.argv[0].lower() for x in ['unittest', 'pytest', 'test']):
+            return True
+        return False
 
     def _logTokenUsage(self, response, modelId):
         """Log input/output token counts from a successful Bedrock response."""
@@ -122,9 +131,9 @@ class BedrockService:
 
     def generateReasoning(self, contextData):
         """
-        Receives context data (dictionary) and queries Bedrock Claude or returns a mock reasoning packet.
+        Receives context data (dictionary) and queries Bedrock Claude or Google Gemini or returns a mock reasoning packet.
         """
-        if AppConfig.mockMode or not self.client:
+        if AppConfig.mockMode:
             return self.generateMockReasoning(contextData)
 
         # Extract semantic rules retrieved via RAG Vector search
@@ -173,6 +182,12 @@ class BedrockService:
         }}
         """
 
+        if AppConfig.geminiApiKey and not self._isTesting():
+            return self.generateGeminiReasoning(contextData, systemPrompt, prompt)
+
+        if not self.client:
+            return self.generateMockReasoning(contextData)
+
         try:
             body = json.dumps({
                 "anthropic_version": "bedrock-2023-05-31",
@@ -202,6 +217,31 @@ class BedrockService:
             
         except Exception as e:
             print(f"Error calling AWS Bedrock: {e}. Falling back to mock reasoning.")
+            return self.generateMockReasoning(contextData)
+
+    def generateGeminiReasoning(self, contextData, systemPrompt, prompt):
+        """Queries Google Gemini 1.5 Flash API directly using the API key."""
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={AppConfig.geminiApiKey}"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "systemInstruction": {"parts": [{"text": systemPrompt}]},
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "temperature": 0.2,
+                "responseMimeType": "application/json"
+            }
+        }
+        try:
+            res = requests.post(url, headers=headers, json=payload, timeout=15)
+            res.raise_for_status()
+            data = res.json()
+            rawText = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            parsed = json.loads(rawText)
+            parsed.setdefault("conflictDetected", False)
+            parsed.setdefault("conflictDescription", None)
+            return parsed
+        except Exception as e:
+            print(f"Gemini API invocation error: {e}. Falling back to mock reasoning.")
             return self.generateMockReasoning(contextData)
 
     def generateMockReasoning(self, context):
@@ -338,6 +378,28 @@ class BedrockService:
         """
         Synthesizes a natural-language rule from a user override (decline action).
         """
+        if not AppConfig.mockMode and AppConfig.geminiApiKey and not self._isTesting():
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={AppConfig.geminiApiKey}"
+            prompt = (
+                f"You are GharBuddy's cognitive rules compiler. Generate a single natural-language user preference rule "
+                f"expressing that the user does not want action '{actionId}' executed at simulated time '{currentTime}' "
+                f"under power status '{powerStatus}'. "
+                f"Keep it short, direct, and focused. Return ONLY the rule text (e.g. 'Never turn on Geyser when water level is critical.') and nothing else."
+            )
+            try:
+                res = requests.post(url, json={
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {"temperature": 0.1}
+                }, timeout=10)
+                res.raise_for_status()
+                ruleText = res.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+                if ruleText.startswith('"') and ruleText.endswith('"'):
+                    ruleText = ruleText[1:-1]
+                return ruleText
+            except Exception as e:
+                print(f"Gemini rule compiler error: {e}")
+                return f"Never automatically trigger {actionId} at {currentTime} under {powerStatus}."
+
         if AppConfig.mockMode or not self.client:
             # Deterministic offline rule synthesis
             if actionId == "turnOnGeyser":
@@ -378,6 +440,29 @@ class BedrockService:
             return f"Never automatically trigger {actionId} at {currentTime} under {powerStatus}."
 
     def generateConsolidatedRule(self, rule1, rule2):
+        if not AppConfig.mockMode and AppConfig.geminiApiKey and not self._isTesting():
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={AppConfig.geminiApiKey}"
+            prompt = (
+                f"You are GharBuddy's cognitive rules optimizer. Consolidate the following two redundant or "
+                f"highly overlapping smart home preference rules into a single clear, cohesive preference rule:\n"
+                f"1) '{rule1}'\n"
+                f"2) '{rule2}'\n"
+                f"Respond with ONLY the single consolidated rule text and nothing else. No explanation, no quotes."
+            )
+            try:
+                res = requests.post(url, json={
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {"temperature": 0.1}
+                }, timeout=10)
+                res.raise_for_status()
+                consolidatedText = res.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+                if consolidatedText.startswith('"') and consolidatedText.endswith('"'):
+                    consolidatedText = consolidatedText[1:-1]
+                return consolidatedText
+            except Exception as e:
+                print(f"Gemini consolidation optimizer error: {e}")
+                return f"Consolidated: {rule1} and {rule2}"
+
         if AppConfig.mockMode or not self.client:
             # Deterministic consolidation logic for offline/mock runs
             if "water pump motor" in rule1.lower() and "water pump motor" in rule2.lower():

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import {
   IconUser,
   IconLock,
@@ -184,258 +185,273 @@ export default function Login({ onAuthenticated }) {
   );
 
   return (
-    <div className="loginPage">
-      <motion.div
-        className="loginCard"
-        initial={{ opacity: 0, y: 18, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        style={{ maxWidth: 440 }}
-      >
-        {/* Brand */}
-        <div style={{ textAlign: "center", marginBottom: 22 }}>
-          <div className="brandMark" style={{
-            width: 56, height: 56, margin: "0 auto 14px",
-            fontSize: 26, borderRadius: 16,
-          }}>🪔</div>
-          <h1 style={{ fontSize: 23, fontWeight: 800, marginBottom: 2 }}>
-            <span className="gradientText">GharBuddy</span>
-          </h1>
-          <p style={{ color: "var(--textMuted)", fontSize: 12 }}>
-            {mode === "signup" ? "Create your home account" : "Welcome back home"}
-          </p>
-        </div>
-
-        {/* Tabs */}
-        <div style={{
-          display: "flex",
-          padding: 4,
-          marginBottom: 18,
-          background: "color-mix(in srgb, var(--bgTertiary) 80%, transparent)",
-          borderRadius: 999,
-          border: "1px solid var(--borderSubtle)",
-        }}>
-          {tabBtn("signin", "Sign In")}
-          {tabBtn("signup", "Sign Up")}
-        </div>
-
-        {/* OAuth — visual placeholder; real OAuth would need a server-side flow */}
-        <button
-          type="button"
-          onClick={() => setServerError("Google sign-in is coming soon. Use a username for now.")}
-          style={{
-            width: "100%", padding: "11px 14px", marginBottom: 12,
-            borderRadius: 10,
-            background: "var(--bgInput)",
-            border: "1px solid var(--borderCard)",
-            color: "var(--textPrimary)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            gap: 10, fontSize: 13.5, fontWeight: 600, cursor: "pointer",
-          }}
+    <GoogleOAuthProvider clientId="760490495261-5uvp3jpq36rj4oe1q3uovod35g4glddj.apps.googleusercontent.com">
+      <div className="loginPage">
+        <motion.div
+          className="loginCard"
+          initial={{ opacity: 0, y: 18, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          style={{ maxWidth: 440 }}
         >
-          <GoogleMark /> Continue with Google
-        </button>
+          {/* Brand */}
+          <div style={{ textAlign: "center", marginBottom: 22 }}>
+            <div className="brandMark" style={{
+              width: 56, height: 56, margin: "0 auto 14px",
+              fontSize: 26, borderRadius: 16,
+            }}>🪔</div>
+            <h1 style={{ fontSize: 23, fontWeight: 800, marginBottom: 2 }}>
+              <span className="gradientText">GharBuddy</span>
+            </h1>
+            <p style={{ color: "var(--textMuted)", fontSize: 12 }}>
+              {mode === "signup" ? "Create your home account" : "Welcome back home"}
+            </p>
+          </div>
 
-        <div style={{
-          display: "flex", alignItems: "center", gap: 10,
-          margin: "12px 0 16px",
-          fontSize: 11, color: "var(--textMuted)", letterSpacing: 0.4,
-          textTransform: "uppercase", fontWeight: 600,
-        }}>
-          <span style={{ flex: 1, height: 1, background: "var(--borderSubtle)" }} />
-          or with username
-          <span style={{ flex: 1, height: 1, background: "var(--borderSubtle)" }} />
-        </div>
+          {/* Tabs */}
+          <div style={{
+            display: "flex",
+            padding: 4,
+            marginBottom: 18,
+            background: "color-mix(in srgb, var(--bgTertiary) 80%, transparent)",
+            borderRadius: 999,
+            border: "1px solid var(--borderSubtle)",
+          }}>
+            {tabBtn("signin", "Sign In")}
+            {tabBtn("signup", "Sign Up")}
+          </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <Field
-            icon={IconUser}
-            value={form.username}
-            onChange={update("username")}
-            placeholder="Username"
-            aria-label="Username"
-            autoComplete="username"
-            error={form.username && errors.username}
-          />
-          <Field
-            icon={IconLock}
-            type="password"
-            value={form.password}
-            onChange={update("password")}
-            placeholder="Password"
-            aria-label="Password"
-            autoComplete={mode === "signup" ? "new-password" : "current-password"}
-            error={form.password && errors.password}
-          />
+          {/* OAuth — real Google login */}
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                setBusy(true);
+                setServerError("");
+                try {
+                  const data = await callApi("/api/auth/google", {
+                    token: credentialResponse.credential,
+                  });
+                  onAuthenticated(data.access_token || data.token, {
+                    username: data.username,
+                    role: data.role,
+                  });
+                  navigate("/app");
+                } catch (err) {
+                  setServerError(err?.message || "Google authentication failed.");
+                  setBusy(false);
+                }
+              }}
+              onError={() => {
+                setServerError("Google Sign-In failed.");
+              }}
+              text="continue_with"
+              theme="filled_blue"
+              shape="rectangular"
+              width="384"
+            />
+          </div>
 
-          <AnimatePresence initial={false}>
-            {mode === "signup" && (
-              <motion.div
-                key="signup-extras"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.22 }}
-                style={{ display: "flex", flexDirection: "column", gap: 12, overflow: "hidden" }}
-              >
-                <Field
-                  icon={IconShield}
-                  type="password"
-                  value={form.confirm}
-                  onChange={update("confirm")}
-                  placeholder="Confirm password"
-                  aria-label="Confirm password"
-                  autoComplete="new-password"
-                  error={form.confirm && errors.confirm}
-                />
-                <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
-                  <legend style={{
-                    fontSize: 11, fontWeight: 600,
-                    color: "var(--textSecondary)",
-                    textTransform: "uppercase", letterSpacing: 0.5,
-                    marginBottom: 8,
-                  }}>
-                    Role in the household
-                  </legend>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-                    {ROLE_OPTIONS.map((r) => {
-                      const active = form.role === r.id;
-                      return (
-                        <button
-                          key={r.id}
-                          type="button"
-                          onClick={() => setForm((f) => ({ ...f, role: r.id }))}
-                          aria-pressed={active}
-                          style={{
-                            padding: "10px 8px",
-                            borderRadius: 10,
-                            cursor: "pointer",
-                            textAlign: "center",
-                            background: active ? "var(--accentSoft)" : "var(--bgInput)",
-                            border: `1px solid ${active ? "var(--accentLine)" : "var(--borderCard)"}`,
-                            color: active ? "var(--accentText)" : "var(--textSecondary)",
-                            transition: "all 0.18s ease",
-                          }}
-                        >
-                          <div style={{ fontSize: 13, fontWeight: 700 }}>{r.label}</div>
-                          <div style={{ fontSize: 10.5, opacity: 0.75, marginTop: 2 }}>{r.hint}</div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </fieldset>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div style={{
+            display: "flex", alignItems: "center", gap: 10,
+            margin: "12px 0 16px",
+            fontSize: 11, color: "var(--textMuted)", letterSpacing: 0.4,
+            textTransform: "uppercase", fontWeight: 600,
+          }}>
+            <span style={{ flex: 1, height: 1, background: "var(--borderSubtle)" }} />
+            or with username
+            <span style={{ flex: 1, height: 1, background: "var(--borderSubtle)" }} />
+          </div>
 
-          {serverError && (
-            <div style={{
-              background: "color-mix(in srgb, var(--colorDanger) 10%, transparent)",
-              border: "1px solid color-mix(in srgb, var(--colorDanger) 30%, transparent)",
-              borderRadius: 10, padding: "10px 12px",
-              fontSize: 12.5, color: "var(--colorDanger)",
-              display: "flex", alignItems: "center", gap: 8,
-            }}>
-              <span aria-hidden>⚠</span> {serverError}
-            </div>
-          )}
+          {/* Form */}
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <Field
+              icon={IconUser}
+              value={form.username}
+              onChange={update("username")}
+              placeholder="Username"
+              aria-label="Username"
+              autoComplete="username"
+              error={form.username && errors.username}
+            />
+            <Field
+              icon={IconLock}
+              type="password"
+              value={form.password}
+              onChange={update("password")}
+              placeholder="Password"
+              aria-label="Password"
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              error={form.password && errors.password}
+            />
 
-          <button
-            type="submit"
-            className="btn btnPrimary"
-            disabled={!canSubmit}
-            style={{
-              width: "100%", padding: 13,
-              fontSize: 14, justifyContent: "center", marginTop: 4,
-            }}
-          >
-            {busy
-              ? (mode === "signup" ? "Creating account…" : "Signing in…")
-              : (
-                <>
-                  {mode === "signup" ? "Create account" : "Sign in"}
-                  <IconArrowRight width="15" height="15" />
-                </>
+            <AnimatePresence initial={false}>
+              {mode === "signup" && (
+                <motion.div
+                  key="signup-extras"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.22 }}
+                  style={{ display: "flex", flexDirection: "column", gap: 12, overflow: "hidden" }}
+                >
+                  <Field
+                    icon={IconShield}
+                    type="password"
+                    value={form.confirm}
+                    onChange={update("confirm")}
+                    placeholder="Confirm password"
+                    aria-label="Confirm password"
+                    autoComplete="new-password"
+                    error={form.confirm && errors.confirm}
+                  />
+                  <fieldset style={{ border: "none", padding: 0, margin: 0 }}>
+                    <legend style={{
+                      fontSize: 11, fontWeight: 600,
+                      color: "var(--textSecondary)",
+                      textTransform: "uppercase", letterSpacing: 0.5,
+                      marginBottom: 8,
+                    }}>
+                      Role in the household
+                    </legend>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
+                      {ROLE_OPTIONS.map((r) => {
+                        const active = form.role === r.id;
+                        return (
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => setForm((f) => ({ ...f, role: r.id }))}
+                            aria-pressed={active}
+                            style={{
+                              padding: "10px 8px",
+                              borderRadius: 10,
+                              cursor: "pointer",
+                              textAlign: "center",
+                              background: active ? "var(--accentSoft)" : "var(--bgInput)",
+                              border: `1px solid ${active ? "var(--accentLine)" : "var(--borderCard)"}`,
+                              color: active ? "var(--accentText)" : "var(--textSecondary)",
+                              transition: "all 0.18s ease",
+                            }}
+                          >
+                            <div style={{ fontSize: 13, fontWeight: 700 }}>{r.label}</div>
+                            <div style={{ fontSize: 10.5, opacity: 0.75, marginTop: 2 }}>{r.hint}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
+                </motion.div>
               )}
-          </button>
-        </form>
+            </AnimatePresence>
 
-        {/* Demo */}
-        <div style={{ marginTop: 20 }}>
-          <button
-            type="button"
-            onClick={() => setDemoOpen((v) => !v)}
-            aria-expanded={demoOpen}
-            style={{
-              width: "100%", padding: "10px 14px",
-              background: "transparent",
-              border: "1px dashed var(--borderCard)",
-              borderRadius: 10,
-              color: "var(--textMuted)",
-              fontSize: 12, cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-            }}
-          >
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <IconSparkle width="13" height="13" />
-              Just want to look around?
-            </span>
-            <span aria-hidden style={{ transform: demoOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>⌄</span>
-          </button>
-
-          <AnimatePresence initial={false}>
-            {demoOpen && (
-              <motion.div
-                key="demo"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.22 }}
-                style={{ overflow: "hidden", marginTop: 10 }}
-              >
-                <div style={{
-                  padding: 12, borderRadius: 10,
-                  background: "var(--secondarySoft)",
-                  border: "1px solid color-mix(in srgb, var(--secondary) 22%, transparent)",
-                }}>
-                  <div style={{ fontSize: 12, color: "var(--textSecondary)", marginBottom: 8 }}>
-                    Sign in with seeded demo credentials. No data leaves your machine.
-                  </div>
-                  <button
-                    type="button"
-                    onClick={enterDemo}
-                    disabled={busy}
-                    className="btn"
-                    style={{
-                      width: "100%", padding: "10px 12px",
-                      fontSize: 12.5, justifyContent: "center",
-                      background: "var(--bgInput)",
-                      border: "1px solid color-mix(in srgb, var(--secondary) 30%, transparent)",
-                      color: "var(--secondary)",
-                      fontWeight: 600,
-                    }}
-                  >
-                    Continue as demo · admin
-                  </button>
-                  <div style={{
-                    marginTop: 8, fontSize: 10.5,
-                    color: "var(--textMuted)", letterSpacing: 0.2,
-                  }}>
-                    Other seeded user: <code>child</code> / <code>child123</code>
-                  </div>
-                </div>
-              </motion.div>
+            {serverError && (
+              <div style={{
+                background: "color-mix(in srgb, var(--colorDanger) 10%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--colorDanger) 30%, transparent)",
+                borderRadius: 10, padding: "10px 12px",
+                fontSize: 12.5, color: "var(--colorDanger)",
+                display: "flex", alignItems: "center", gap: 8,
+              }}>
+                <span aria-hidden>⚠</span> {serverError}
+              </div>
             )}
-          </AnimatePresence>
-        </div>
 
-        <div style={{ textAlign: "center", marginTop: 16 }}>
-          <Link to="/" style={{ fontSize: 12, color: "var(--textMuted)", textDecoration: "none" }}>
-            ← Back to home
-          </Link>
-        </div>
-      </motion.div>
-    </div>
+            <button
+              type="submit"
+              className="btn btnPrimary"
+              disabled={!canSubmit}
+              style={{
+                width: "100%", padding: 13,
+                fontSize: 14, justifyContent: "center", marginTop: 4,
+              }}
+            >
+              {busy
+                ? (mode === "signup" ? "Creating account…" : "Signing in…")
+                : (
+                  <>
+                    {mode === "signup" ? "Create account" : "Sign in"}
+                    <IconArrowRight width="15" height="15" />
+                  </>
+                )}
+            </button>
+          </form>
+
+          {/* Demo */}
+          <div style={{ marginTop: 20 }}>
+            <button
+              type="button"
+              onClick={() => setDemoOpen((v) => !v)}
+              aria-expanded={demoOpen}
+              style={{
+                width: "100%", padding: "10px 14px",
+                background: "transparent",
+                border: "1px dashed var(--borderCard)",
+                borderRadius: 10,
+                color: "var(--textMuted)",
+                fontSize: 12, cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+              }}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <IconSparkle width="13" height="13" />
+                Just want to look around?
+              </span>
+              <span aria-hidden style={{ transform: demoOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>⌄</span>
+            </button>
+
+            <AnimatePresence initial={false}>
+              {demoOpen && (
+                <motion.div
+                  key="demo"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.22 }}
+                  style={{ overflow: "hidden", marginTop: 10 }}
+                >
+                  <div style={{
+                    padding: 12, borderRadius: 10,
+                    background: "var(--secondarySoft)",
+                    border: "1px solid color-mix(in srgb, var(--secondary) 22%, transparent)",
+                  }}>
+                    <div style={{ fontSize: 12, color: "var(--textSecondary)", marginBottom: 8 }}>
+                      Sign in with seeded demo credentials. No data leaves your machine.
+                    </div>
+                    <button
+                      type="button"
+                      onClick={enterDemo}
+                      disabled={busy}
+                      className="btn"
+                      style={{
+                        width: "100%", padding: "10px 12px",
+                        fontSize: 12.5, justifyContent: "center",
+                        background: "var(--bgInput)",
+                        border: "1px solid color-mix(in srgb, var(--secondary) 30%, transparent)",
+                        color: "var(--secondary)",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Continue as demo · admin
+                    </button>
+                    <div style={{
+                      marginTop: 8, fontSize: 10.5,
+                      color: "var(--textMuted)", letterSpacing: 0.2,
+                    }}>
+                      Other seeded user: <code>child</code> / <code>child123</code>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div style={{ textAlign: "center", marginTop: 16 }}>
+            <Link to="/" style={{ fontSize: 12, color: "var(--textMuted)", textDecoration: "none" }}>
+              ← Back to home
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    </GoogleOAuthProvider>
   );
 }
