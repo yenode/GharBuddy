@@ -6,6 +6,7 @@ skinparam DefaultFontSize         12
 skinparam roundcorner             12
 skinparam ArrowColor              #475569
 skinparam ArrowThickness          2
+skinparam shadowing               false
 
 skinparam activity {
     BackgroundColor        #F3E8FF
@@ -17,25 +18,25 @@ skinparam activity {
     EndColor               #DC2626
 }
 
-title <size:18><b>GharBuddy — LSTM Weekly Retraining Workflow</b></size>\n<i>Activity Diagram: Background Scheduler & Model Lifecycle</i>
+title <size:18><b>GharBuddy - LSTM Weekly Retraining Workflow</b></size>\n<i>Activity Diagram: Background Scheduler and Model Lifecycle</i>
 
 start
 
 :FastAPI server starts;
 :Background daemon thread spawned\n(training_loop_thread);
-:Enter weekly sleep cycle\n(datetime interval: 7 days);
+:Enter weekly sleep cycle\n(interval: 7 days);
 
 repeat
     :Wake up from 7-day sleep;
 
-    #DBEAFE :Fetch EventLogs from PostgreSQL:\nSELECT * FROM EventLogs\nWHERE timestamp > (now - 30 days)\nORDER BY timestamp ASC;
+    #DBEAFE :Fetch EventLogs from PostgreSQL:\nSELECT FROM EventLogs\nWHERE timestamp > (now - 30 days)\nORDER BY timestamp ASC;
 
     if (Sufficient training events?\n(minimum 50 confirmed actions)) then (Yes)
         #D1FAE5 :Load existing ONNX model\n(Backend/Data/routine_lstm.onnx);
 
-        #D1FAE5 :Build training tensors:\n──────────────────────\nhour-of-day (0–23)\nday-of-week (0–6)\nis_festival (bool)\nis_fasting (bool)\nsensor_event_type (encoded)\npredicted_action (label);
+        #D1FAE5 :Build training tensors:\n-hour-of-day (0-23)\n-day-of-week (0-6)\n-is_festival (bool)\n-is_fasting (bool)\n-sensor_event_type (encoded)\n-predicted_action (label);
 
-        #FEF3C7 :Train PyTorch LSTM model:\n──────────────────────\nHidden dim: 128\nNum layers: 2\nSequence length: 48 slots/day\nEpochs: 50\nLoss: CrossEntropyLoss\nOptimizer: Adam (lr=0.001);
+        #FEF3C7 :Train PyTorch LSTM model:\n-Hidden dim: 128\n-Num layers: 2\n-Sequence length: 48 slots/day\n-Epochs: 50\n-Loss: CrossEntropyLoss\n-Optimizer: Adam (lr=0.001);
 
         #FEF3C7 :Evaluate model on\nheld-out validation set;
 
@@ -48,12 +49,12 @@ repeat
                 No server restart needed.
             end note
         else (Degraded)
-            #FEE2E2 :Discard new weights;\n Retain existing onnx;
+            #FEE2E2 :Discard new weights\nRetain existing onnx;
             #FEE2E2 :Log degraded training attempt;
         endif
 
-    else (No / Insufficient data)
-        #E2E8F0 :Skip this cycle;\n Log: "Insufficient events";
+    else (No - Insufficient data)
+        #E2E8F0 :Skip this cycle\nLog: "Insufficient events";
     endif
 
     if (Manual trigger received?\nPOST /api/admin/train-lstm) then (Yes)
@@ -64,7 +65,7 @@ repeat
     :Sleep for 7 more days;
 
 repeat while (Server running?) is (Yes)
--> No (Server shutting down);
+-> No;
 
 stop
 
